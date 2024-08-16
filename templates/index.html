@@ -1,0 +1,299 @@
+    <!DOCTYPE html>
+    <html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Parfumerie</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                background-image: url('https://example.com/your-background-image.jpg');
+                background-size: cover;
+                background-position: center;
+                color: #333;
+                font-family: Arial, sans-serif;
+            }
+
+            .container {
+                background-color: rgba(255, 255, 255, 0.9);
+                border-radius: 15px;
+                padding: 20px;
+                margin-top: 50px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .table-responsive {
+                margin-top: 20px;
+            }
+
+            .modal-content {
+                border-radius: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2>Bienvenue sur votre application de gestion de parfums</h2>
+            </div>
+        </div>
+        <div class="container mt-4">
+            <h2>Recherche de Parfum</h2>
+            <form id="searchForm" action="/search" method="POST">
+                <div class="form-group">
+                    <label for="searchTerm">Terme de recherche</label>
+                    <input type="text" class="form-control" id="searchTerm" name="keyword" placeholder="Entrez votre terme de recherche">
+                </div>
+
+            </form>
+            <div id="searchResults" class="mt-4"></div>
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                $('#searchTerm').on('input', function() {
+                    var keyword = $(this).val().trim();
+                    if (keyword.length >= 2) {
+                        // Envoyer une requête AJAX au serveur Flask
+                        $.ajax({
+                            url: '/search',
+                            method: 'POST',
+                            data: {
+                                keyword: keyword,
+                                category: 'all'  // Catégorie 'all' pour rechercher dans tous les champs
+                            },
+                            success: function(response) {
+                                $('#searchResults').html(response);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erreur de recherche:', error);
+                            }
+                        });
+                    } else {
+                        // Effacer les résultats si la recherche est vide ou trop courte
+                        $('#searchResults').html('');
+                    }
+                });
+            });
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <button class="btn btn-success" data-toggle="modal" data-target="#addParfumModal">Ajouter un parfum</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table id="mytable" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>N° Ref</th>
+                            <th>Parfum</th>
+                            <th>Fournisseur</th>
+                            <th>En Stock</th>
+                            <th>Genre</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                            <th>Change</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for parf in parfum %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="checkthis" onchange="updateCommandList(this)" data-ref="{{ parf[1] }}" data-nom="{{ parf[2] }}" data-genre="{{ parf[5] }}">
+                            </td>
+                            <td>{{ parf[1] }}</td>
+                            <td>{{ parf[2] }}</td>
+                            <td>{{ parf[3] }}</td>
+                            <td>{{ parf[4] }}</td>
+                            <td>{{parf[5]}}</td>
+                            <td>
+                                <button class="btn btn-primary btn-xs" onclick="openEditModal('{{ parf[1] }}', '{{ parf[2] }}', '{{ parf[3] }}')">
+                                    <span class="glyphicon glyphicon-pencil"></span> Éditer
+                                </button>
+                            </td>
+                            <td>
+                                <form id="delete-form-{{ parf[1] }}" action="/delete" method="post">
+                                    <input type="hidden" name="ref" value="{{ parf[1] }}">
+                                    <button type="button" class="btn btn-danger btn-xs" onclick="confirmDelete('{{ parf[1] }}')">
+                                        <span class="glyphicon glyphicon-trash"></span> Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-xs" onclick="openChangeModal('{{ parf[1] }}', '{{ parf[4] }}')">
+                                    <span class="glyphicon glyphicon-refresh"></span> Changer
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="commandList" class="container">
+        <h4>Liste de commandes</h4>
+        <ul id="selectedItems"></ul>
+    </div>
+
+    <script>
+        function updateCommandList(checkbox) {
+       var selectedItems = document.getElementById('selectedItems');
+       var ref = checkbox.getAttribute('data-ref');
+       var nom = checkbox.getAttribute('data-nom');
+       var genre = checkbox.getAttribute('data-genre');
+
+       if (checkbox.checked) {
+           var listItem = document.createElement('li');
+           listItem.innerHTML = ref + ' - ' + nom + ' - ' + genre;
+           listItem.setAttribute('data-ref', ref);
+           selectedItems.appendChild(listItem);
+       } else {
+           var items = selectedItems.getElementsByTagName('li');
+           for (var i = 0; i < items.length; i++) {
+               if (items[i].getAttribute('data-ref') === ref) {
+                   selectedItems.removeChild(items[i]);
+                   break;
+               }
+           }
+       }
+   }
+
+
+       function openEditModal(ref, nom, fournisseur) {
+           document.getElementById('editOldRef').value = ref;
+           document.getElementById('editNewRef').value = ref;
+           document.getElementById('editName').value = nom;
+           document.getElementById('editFournisseur').value = fournisseur;
+           $('#editParfumModal').modal('show');
+       }
+
+       function openChangeModal(ref, currentStock) {
+           document.getElementById('changeRef').value = ref;
+           document.getElementById('currentStock').value = currentStock;
+           $('#changeStockModal').modal('show');
+       }
+
+       function confirmDelete(ref) {
+           if (confirm("Êtes-vous sûr de vouloir supprimer ce parfum ?")) {
+               document.getElementById('delete-form-' + ref).submit();
+           }
+       }
+    </script>
+
+    <div class="modal fade" id="addParfumModal" tabindex="-1" role="dialog" aria-labelledby="addParfumModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="addParfumModalLabel">Ajouter un nouveau parfum</h4>
+                </div>
+                <form id="addParfumForm" action="/add" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="Ref">N° Référence</label>
+                            <input type="text" class="form-control" id="Ref" name="ref" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newName">Nom du parfum</label>
+                            <input type="text" class="form-control" id="newName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Fournisseur">Fournisseur</label>
+                            <input type="text" class="form-control" id="Fournisseur" name="fournisseur" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Genre">Genre</label>
+                            <input type="text" class="form-control" id="Genre" name="genre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Stock">Stock</label>
+                            <input type="number" class="form-control" id="Stock" name="stock" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editParfumModal" tabindex="-1" role="dialog" aria-labelledby="editParfumModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="editParfumModalLabel">Modifier le parfum</h4>
+                </div>
+                <form id="editParfumForm" action="/edit" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editOldRef" name="old_ref">
+                        <div class="form-group">
+                            <label for="editNewRef">N° Référence</label>
+                            <input type="text" class="form-control" id="editNewRef" name="new_ref" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editName">Nom du parfum</label>
+                            <input type="text" class="form-control" id="editName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editFournisseur">Fournisseur</label>
+                            <input type="text" class="form-control" id="editFournisseur" name="fournisseur" required>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeStockModal" tabindex="-1" role="dialog" aria-labelledby="changeStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="changeStockModalLabel">Changer le stock</h4>
+                </div>
+                <form id="changeStockForm" action="/change" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="changeRef" name="ref">
+                        <div class="form-group">
+                            <label for="currentStock">Stock actuel</label>
+                            <input type="text" class="form-control" id="currentStock" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="newStock">Nouveau stock</label>
+                            <input type="number" class="form-control" id="newStock" name="stock" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+    </html>
