@@ -71,3 +71,6 @@ def search():
     keyword = request.form.get('keyword')
     results = db.search_all_fields(keyword)
     return render_template('index.html', parfum=results)
+
+if __name__ == '__main__':
+    app.run()

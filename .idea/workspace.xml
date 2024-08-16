@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4ff29297-7211-4b7d-a7c9-384b591d0212" name="Changes" comment="nouveauté" />
+    <list default="true" id="4ff29297-7211-4b7d-a7c9-384b591d0212" name="Changes" comment="ajout nouveaux fichiers">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -63,11 +66,21 @@
       <option name="project" value="LOCAL" />
       <updated>1723806558626</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="ajout nouveaux fichiers">
+      <option name="closed" value="true" />
+      <created>1723807745434</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1723807745434</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="nouveauté" />
-    <option name="LAST_COMMIT_MESSAGE" value="nouveauté" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/main'" />
+    <MESSAGE value="ajout nouveaux fichiers" />
+    <option name="LAST_COMMIT_MESSAGE" value="ajout nouveaux fichiers" />
   </component>
 </project>
